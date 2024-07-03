@@ -1,0 +1,46 @@
+name: "NixOS Configuration Diff"
+description: "Shows a diff between NixOS configurations on Pull Requests"
+inputs:
+  configuration:
+    description: "NixOS configuration flake attribute"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout Base Repository
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.base_ref }}
+    
+    - name: Build base configuration
+      runs: echo "base-storedir=$(nix build .#nixosConfigurations.${{ inputs.configuration }} --no-link --print-out-paths)" >> $GITHUB_OUTPUT
+      shell: bash
+    
+    - name: Checkout PR Repository
+      uses: actions/checkout@v4
+    
+    - name: Build PR configuration
+      runs: echo "pr-storedir=$(nix build .#nixosConfigurations.${{ inputs.configuration }} --no-link --print-out-paths)" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Run diff
+      runs: |
+        difftext="$(
+          nix-shell --packages nvd -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/d032c1a6dfad4eedec7e35e91986becc699d7d69.tar.gz \
+            --run "nvd ${{ outputs.base-storedir }} ${{ outputs.pr-storedir }}"
+        )"
+        echo "difftext=$difftext" >> $GITHUB_OUTPUT
+
+    - name: Post PR comment
+      uses: thollander/actions-comment-pull-request@v2
+      with:
+        message: |
+          Beep Boop :robot:
+
+          ---
+
+          Version changes for the flake attribute `.#${{ inputs.configuration }}`:
+          
+          ```
+          ${{ outputs.difftext }}
+          ```
