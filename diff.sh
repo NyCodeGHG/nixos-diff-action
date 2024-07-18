@@ -5,7 +5,7 @@ set -euo pipefail
 # 24.05
 NIXPKGS="https://github.com/NixOS/nixpkgs/archive/c716603a63aca44f39bef1986c13402167450e0a.tar.gz"
 
-if [[ -x "$(command -v nix)" ]]; then
+if [[ ! -x "$(command -v nix)" ]]; then
     echo '::error::Could not find nix. Did you install Nix?'
     exit 1
 fi
