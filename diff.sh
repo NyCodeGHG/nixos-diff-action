@@ -33,7 +33,7 @@ if [[ "$base" == "$target" ]]; then
 fi
 
 echo "::group::Fetching nvd"
-nvd="$(nix build -f "$NIXPKGS" --no-link --print-out-paths)/bin/nvd"
+nvd="$(nix build -f "$NIXPKGS" --no-link --print-out-paths nvd)/bin/nvd"
 echo "nvd is $nvd"
 echo "::endgroup::"
 
