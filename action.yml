@@ -2,45 +2,30 @@ name: "NixOS Configuration Diff"
 description: "Shows a diff between NixOS configurations on Pull Requests"
 inputs:
   configuration:
-    description: "NixOS configuration flake attribute"
+    description: "NixOS configuration flake attribute to diff."
     required: true
 runs:
   using: "composite"
   steps:
     - name: Checkout Base Repository
       uses: actions/checkout@v4
+      path: nix-diff-base
       with:
         ref: ${{ github.base_ref }}
     
-    - name: Build base configuration
-      runs: echo "base-storedir=$(nix build .#nixosConfigurations.${{ inputs.configuration }} --no-link --print-out-paths)" >> $GITHUB_OUTPUT
-      shell: bash
-    
     - name: Checkout PR Repository
       uses: actions/checkout@v4
-    
-    - name: Build PR configuration
-      runs: echo "pr-storedir=$(nix build .#nixosConfigurations.${{ inputs.configuration }} --no-link --print-out-paths)" >> $GITHUB_OUTPUT
+      path: nix-diff-target
+
+    - name: Run Diff Script
+      run: ${GITHUB_ACTION_PATH}/diff.sh
+      id: diff
       shell: bash
-
-    - name: Run diff
-      runs: |
-        difftext="$(
-          nix-shell --packages nvd -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/d032c1a6dfad4eedec7e35e91986becc699d7d69.tar.gz \
-            --run "nvd ${{ outputs.base-storedir }} ${{ outputs.pr-storedir }}"
-        )"
-        echo "difftext=$difftext" >> $GITHUB_OUTPUT
-
-    - name: Post PR comment
+      env:
+        CONFIGURATION: ${{ inputs.configuration }}
+    
+    - name: Comment on PR
       uses: thollander/actions-comment-pull-request@v2
       with:
-        message: |
-          Beep Boop :robot:
-
-          ---
-
-          Version changes for the flake attribute `.#${{ inputs.configuration }}`:
-          
-          ```
-          ${{ outputs.difftext }}
-          ```
+        filePath: ${{ steps.diff.outputs.comment_file }}
+        comment_tag: "nixos-diff-pr-comment-marker: ${{ inputs.configuration }}"
