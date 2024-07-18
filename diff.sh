@@ -29,8 +29,11 @@ echo "::endgroup::"
 
 if [[ "$base" == "$target" ]]; then
     echo "Configuration has not changed. Skipping."
+    echo "skip=true" >> "$GITHUB_OUTPUT"
     exit 0
 fi
+
+echo "skip=false" >> "$GITHUB_OUTPUT"
 
 echo "::group::Fetching nvd"
 nvd="$(nix build -f "$NIXPKGS" --no-link --print-out-paths nvd)/bin/nvd"
