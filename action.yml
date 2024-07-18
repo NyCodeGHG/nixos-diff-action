@@ -25,7 +25,7 @@ runs:
         CONFIGURATION: ${{ inputs.configuration }}
     
     - name: Comment on PR
-      uses: thollander/actions-comment-pull-request@v2
+      uses: https://github.com/thollander/actions-comment-pull-request@v2
       with:
         filePath: ${{ steps.diff.outputs.comment_file }}
         comment_tag: "nixos-diff-pr-comment-marker: ${{ inputs.configuration }}"
