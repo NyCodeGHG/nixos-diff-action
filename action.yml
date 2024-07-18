@@ -9,13 +9,14 @@ runs:
   steps:
     - name: Checkout Base Repository
       uses: actions/checkout@v4
-      path: nix-diff-base
       with:
         ref: ${{ github.base_ref }}
+        path: nix-diff-base
     
     - name: Checkout PR Repository
       uses: actions/checkout@v4
-      path: nix-diff-target
+      with:
+        path: nix-diff-target
 
     - name: Run Diff Script
       run: ${GITHUB_ACTION_PATH}/diff.sh
