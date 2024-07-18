@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -euox pipefail
 
 # 24.05
 NIXPKGS="https://github.com/NixOS/nixpkgs/archive/c716603a63aca44f39bef1986c13402167450e0a.tar.gz"
